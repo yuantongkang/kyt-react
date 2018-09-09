@@ -1,18 +1,19 @@
 import { render } from "./element";
-
+let index= 0
 let allPatches
-function patch(node,patches) {
+export function patch(node,patches) {
     allPatches = patches
-    let index= 0
     walk(node)
 }
-function walk(){
-    let currentPatch = patches[index++]
+function walk(node){
+    let currentPatch = allPatches[index++]
     let  childNodes = node.childNodes
     childNodes.forEach(child => {
         walk(child)
     });
-    if(currentPatch.patch>0){}
+    if(currentPatch){
+        doPatch(node,currentPatch)
+    }
 }
 function doPatch(node,patches){
     patches.forEach(patch=>{
@@ -21,7 +22,7 @@ function doPatch(node,patches){
                 node.textContent = patch.text
             break
             case "REPLACE":
-                let newNode = (patches.newNode instanceof Element)?render(patches.newNode):document.createTextNode(patches)
+                let newNode = (patch.newNode instanceof Element)?render(patch.newNode):document.createTextNode(patch)
                 node.parentNode.replaceChild(newNode,node)
             break
             case "REMOVE":
@@ -39,4 +40,20 @@ function doPatch(node,patches){
             break
         }
     })
+}
+function setAttr(node,key,value){
+    switch(key){
+        case 'value':
+        if(node.tagName === 'input'){
+            node.value = value
+        }else{
+            node.setAttribute(key,value)
+        }
+        break
+        case 'style':
+            node.style.cssText = value
+        break
+        default:
+            node.setAttribute(key,value)
+    }
 }

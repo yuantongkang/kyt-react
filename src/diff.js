@@ -9,6 +9,7 @@ export function diff(oldTree, newTree) {
 
 function diffAttr(newAttrs, oldAttrs) {
     let patch = {}
+
     for (let key in oldAttrs) {
         if (oldAttrs[key] !== newAttrs[key]) {
             patch[key] = newAttrs[key]
@@ -20,16 +21,17 @@ function diffAttr(newAttrs, oldAttrs) {
             patch[key] = newAttrs[key]
         }
     }
+
     return patch
 }
 
 
 function walk(oldNode, newNode, index, patches) {
-    console.log("newNode",newNode)
-    console.log("oldNode",oldNode)
     let currentPatch = []
+    console.log(newNode)
     if(!newNode){
         currentPatch.push({type:"REMOVE"},index)
+
     }else if (isString(newNode) && isString(oldNode)) {
         if (oldNode !== newNode) {
             currentPatch.push({
@@ -38,13 +40,13 @@ function walk(oldNode, newNode, index, patches) {
             })
         }
     } else if(oldNode.type === newNode.type){
-        let attrs = diffAttr(oldNode.props,newNode.props)
+        let attrs = diffAttr(newNode.props,oldNode.props)
         if (Object.keys(attrs).length > 0) {
             currentPatch.push({
                 type: "ATTRS"
             }, attrs)
         } 
-        if(oldNode.children && newNode.children){
+        if(oldNode.children&&newNode.children){
             diffChildren(oldNode.children, newNode.children, patches)
         }
     }else {
@@ -60,7 +62,6 @@ function walk(oldNode, newNode, index, patches) {
 }
 
 function diffChildren(oldChildren, newChildren,patches) {
-    console.log(oldChildren,newChildren)
     oldChildren.forEach((child, idx) => {
         walk(child, newChildren[idx], INDEX++, patches)
     });
@@ -68,6 +69,5 @@ function diffChildren(oldChildren, newChildren,patches) {
 }
 
 function isString(node) {
-
-    Object.prototype.toString.call(node) === "[object String]"
+    return Object.prototype.toString.call(node) === "[object String]"
 }
